@@ -82,7 +82,7 @@ Never Empty
 413 distinct values
 	(More distinct region_url's than regions due to same region in multiple states)
 Often the prefix of url column, not NOT ALWAYS
-	796 occurrences where they're DIFFERENT
+	796 occurrences where they're DIFFERENT => Use the beggining of url instead of region_url
 Examples:
 https://hudsonvalley.craigslist.org/ctd/d/pawling-2006-scion-tc-great-condition/7049891619.html		https://catskills.craigslist.org
 https://oneonta.craigslist.org/cto/d/franklin-2000-toyota-tundra-2wd/7049982840.html				https://catskills.craigslist.org
@@ -404,8 +404,7 @@ Categorical
 37 Empty rows
 51 Distinct values:
 	2-character, lowercase state abbreviations and 'dc'
-	
-	
+
 
 lat
 ---
@@ -415,7 +414,7 @@ Values range from -82 to 81.5
 Which values are VALID for the United States?
 	About 19 to 72 degrees
 	Alaska account for values above 50 degrees
-	
+
 
 long
 ----
@@ -427,3 +426,26 @@ Which values are VALID for the United States?
 	Alaska and Hawaii account for everything below about -125
 
 
+Task 1:
+    1. Drop based on descriptions - Brett
+    2. Drop based on completely empty - Brett
+    3. Continuous: Plot feature vs target - Brett
+    4. Categorical: Box plots or scatter plots - Tomás
+    5. Lat-lng heatmap - Tomás
+
+
+First steps: (Task 2)
+    1. Imputing missing values => continuous and categorical
+    2. Drop useless columns
+    3. Categorical variables encoding
+
+Second steps: (Task 3)
+    0. Drop rows with "bad" target values (zero, too low, too high)
+    1. Detect invalid values and replacing them with something (e.g. binning odometer, prices, etc.)
+    2. Binning colors, and check which other column we can bin (e.g. title_status, etc.)
+    3. Parse url and use base as a new feature
+    
+Advanced steps: (Task 3 - optional)
+    1. Cleaning up model and manufacturer data (some kind of smart imputation)
+    2. Add feature from url => owner or dealer
+    3. Try something out using the description
