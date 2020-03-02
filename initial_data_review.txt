@@ -1,0 +1,412 @@
+Overall
+-------
+509,577 rows
+
+Some rows (37) are messed up when you import into Excel:
+e.g. 118,764	118,771		119,221
+Bad CSV formatting?
+Causes 509,614 rows to appear in Excel
+Correct # of lines in BBEdit
+Does Pandas handle this?
+
+
+
+Rows
+----
+Which ROWS should we throw away?
+Some are very empty:
+6999177549,https://onslow.craigslist.org/ctd/d/swansboro-2014-mercedes-benz-cla-cla/6999177549.html,jacksonville,https://onslow.craigslist.org,277,,,,,,,,,,,,,,,,,,nc,,
+If we remove rows missing values, how will be predict on them?
+
+
+
+Columns
+-------
+
+I would think that Year and Manufacturer/Model would be the best indicators of Price
+
+
+
+id
+--
+UNIQUE
+Never Empty
+Indicates how LONG the listing has been on Craigslist?
+
+
+
+url
+---
+UNIQUE
+Never Empty
+Contains region_url (for the most part, see below)
+Contains id column
+Often (not always) contains vehicle description
+What's ctd vs cto in the URL?
+	/ctd/ = DEALER LISTING	(75%)
+	/cto/ = OWNER LISTING	(25%)
+	Could be an informative indicator!
+
+
+
+region
+------
+Categorical
+Never Empty
+403 distinct values
+Appears to be derived from the region_url column, NOT the url column (when they're different)
+
+By itself, NOT SPECIFIC ENOUGH:  Some 'regions' are duplicated in different states:
+e.g.
+albany	https://albany.craigslist.org
+albany	https://albanyga.craigslist.org
+
+athens	https://athensga.craigslist.org
+athens	https://athensohio.craigslist.org
+
+charleston	https://charleston.craigslist.org
+charleston	https://charlestonwv.craigslist.org
+
+We either need to combine with 'state', or just use 'region_url'
+	When we combine with 'state', we get about 420 combos
+	Some 'state' vals are incorrect, and some are missing, causing bad pairs
+	
+
+
+region_url
+----------
+Categorical
+Never Empty
+413 distinct values
+	(More distinct region_url's than regions)
+Often the prefix of url column, not NOT ALWAYS
+796 occurrences where they're DIFFERENT
+Examples:
+https://hudsonvalley.craigslist.org/ctd/d/pawling-2006-scion-tc-great-condition/7049891619.html		https://catskills.craigslist.org
+https://oneonta.craigslist.org/cto/d/franklin-2000-toyota-tundra-2wd/7049982840.html				https://catskills.craigslist.org
+https://poconos.craigslist.org/cto/d/cresco-2003-chevy-trailblazer-4wd/7049972204.html				https://catskills.craigslist.org
+
+
+
+price
+-----
+Continuous
+Never empty
+43,579 rows with price=0
+3,084 rows with price=1
+Addition 465 rows with price < $50
+65 rows with price > $1,000,000
+48 rows with price > $10,000,000
+Max is $3bn+
+Also, suspicious prices like '1111111' and '9999999'
+At what thresholds should we consider a price to be INVALID, and ignore the row?
+
+
+
+year
+----
+Continuous
+1527 Empty rows
+Values: 1900-2021, all reasonable
+
+
+
+manufacturer
+------------
+Categorical
+22,764 rows missing value (4%)
+43 distinct values, most names look accurate
+	Except 'porche'
+Missing some values like 'isuzu' and 'suzuki'
+It looks like the manufacturer is parsed from the model column,
+and when it doesn't match a known value, it's left empty.
+	e.g. "Cadilla DTS"
+When manufacturer is empty, it often appears in the 'model' column instead.
+AND/OR, IMPUTE missing 'manufacturer' from other rows with same 'model'?
+	e.g. if we see 'prius' as a model, but with no manufacturer, we know it's 'toyota'
+
+RE-COMBINE manufacturer and (cleaned) model and use as a categorical value?
+
+Must LOWERCASE the manufacturer names for consistency
+NOTE: All manufacturer names are ONE WORD EXCEPT "land rover"
+
+
+
+model
+-----
+Categorical
+7,987 Empty rows
+(far fewer than manufacturer.  Could we infer a manufacturer?)
+CASE SENSITIVE differences:
+	35,820 unique values if we consider CaSe
+	34,257 unique values if we DON'T consider CaSe (not much of a difference)
+Should remove case-sensitivities!
+
+LOTS of duplication, misspelling, free-form descriptions:
+
+yukon xl denali 4wd
+yukon xl denali 4x4
+yukon xl denali 4x4 gas suv
+yukon xl denali awd
+yukon xl denali dvd leather
+yukon xl denali sunroof nav
+yukon xl denali xl
+yukon xl denali4wd automatic
+
+xv crosstrek
+xv crosstrek "limited"
+xv crosstrek 2.0 limited
+xv crosstrek 2.0i limited
+xv crosstrek 2.0i premiu
+xv crosstrek 2.0i premium
+xv crosstrek 2.0i premium 4d sport utility
+xv crosstrek 2.0i premium awd 4dr crossover cvt
+xv crosstrek 5dr auto 2.0i premium
+xv crosstrek awd preimum
+xv crosstrek awd premium
+
+We DON'T want to consider these different models!
+Requires LOTS of CLEANUP!
+
+Possible preprocessing:
+Replace non-alphanumeric chars with spaces?
+Replace multiple spaces with single space
+Consider the first two or three words?
+
+
+
+condition
+---------
+Categorical (Ordered)
+231,933 Empty rows (46%)
+	(Almost half of the data is missing...)
+6 Distinct values:
+	excellent
+	good
+	like new
+	fair
+	new
+	salvage
+
+
+
+cylinders
+---------
+Categorical (Ordered) (Discrete)
+199,682 Empty rows (39%)
+8 Distinct values:
+	3 cylinders
+	4 cylinders
+	5 cylinders
+	6 cylinders
+	8 cylinders
+	10 cylinders
+	12 cylinders
+	other
+
+Should mostly be a function of Model (and maybe year)
+
+
+
+fuel
+----
+Categorical
+3,985 Empty rows
+5 Distinct values:
+	gas
+	diesel
+	other
+	electric
+	hybrid
+
+Again, mostly a function of model
+
+
+
+odometer
+--------
+Continuous
+92,324 Empty rows
+2,268 rows with odometer=0
+Another 784 rows with odometer < 10
+Lots of '999999', '9999999' values
+1,061 rows with odometer > 500,000
+414 rows with odometer >= 1,000,000
+4 rows with odometer >= 10,000,000
+
+When should we consider this data to be INVALID?
+If it looks invalid, how do  we clean it up?
+Too many zeros?
+e.g. 6,500,000 is probably supposed to be 65,000
+Why lots of repeated, very specific values? e.g. 1,393,421
+How should we find & handle outliers?
+
+
+
+title_status
+------------
+Categorical (Ordered?)
+3,062 Empty rows
+6 Distinct Values:
+	clean
+	rebuilt
+	salvage
+	lien
+	missing
+	parts only
+
+
+
+transmission
+------------
+Categorical
+3,719 Empty rows
+3 Distinct values:
+	manual
+	automatic
+	other
+	
+Traditionally, automatics were slightly more expensive...
+
+
+
+vin
+---
+207,350 Empty rows (41%)
+295,103 valid VINs (if we ignore case)
+	Only 175,973 are actually Distinct, lots of duplicates
+Otherwise, lots of garbage, 1 missing character, only last 6 digits, 'upon request', etc. (7,124 rows)
+
+Not sure we can do anything with this.  Should be unique per vehicle, but DOES encode information about the vehicle,
+but slightly different per manufacturer.
+
+
+
+drive
+-----
+Categorical
+144,143 Empty rows (28%)
+3 Distinct values:
+	4wd
+	fwd
+	rwd
+
+Often a function of *model*
+
+
+
+size
+----
+Categorical (Ordered)
+342,003 Empty rows (67%)
+4 Distinct values:
+	compact
+	mid-size
+	full-size
+	sub-compact
+	
+This is really a function of vehicle *model*, which includes more information about the price.
+
+
+
+type
+----
+Categorical
+141,531 Empty rows (28%)
+13 Distinct values:
+	hatchback
+	pickup
+	SUV
+	sedan
+	truck
+	wagon
+	van
+	coupe
+	convertible
+	other
+	offroad
+	mini-van
+	bus
+
+What sort of impact does this have on price?
+This is really a function of vehicle *model*, which includes more information about the price.
+
+
+
+paint_color
+-----------
+Categorical
+164,706 Empty rows (32%)
+12 Distinct values:
+	black
+	white
+	silver
+	brown
+	blue
+	grey
+	red
+	custom
+	purple
+	yellow
+	green
+	orange
+
+How much does this impact price?
+Is 'custom' a turn-off or a premium?
+Should we 'bin' these into common colors and 'unusual' colors?
+	bin by frequency?
+
+
+
+image_url
+---------
+14 Empty rows
+Remaining 509,563 rows are pretty UNINFORMATIVE with regards to price
+e.g. https://images.craigslist.org/00j0j_hj9jpUze7Ys_600x450.jpg
+
+
+
+description
+-----------
+Free form text
+16 Empty rows
+Many duplicates
+
+What can we EXTRACT from this?
+Could this be LEAKING Price information?
+e.g. "...Asking $68,500 OBO... Ask for Mark at  show contact info"
+e.g. "...originally it sold for $71,055 (MSRP in glove box)..."
+
+
+
+county
+------
+COMPLETELY EMPTY - DELETE!
+
+
+state
+-----
+Categorical
+37 Empty rows
+51 Distinct values:
+	2-character, lowercase state abbreviations and 'dc'
+	
+	
+
+lat
+---
+Continuous
+10,329 Empty rows
+Values range from -82 to 81.5
+Which values are VALID for the United States?
+
+
+long
+----
+Continuous
+10,329 Empty rows
+Values range from -165 to 94
+Which values are VALID for the United States?
+
+
+
