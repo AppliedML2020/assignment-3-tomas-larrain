@@ -16,14 +16,14 @@ Rows
 Which ROWS should we throw away?
 Some are very empty:
 6999177549,https://onslow.craigslist.org/ctd/d/swansboro-2014-mercedes-benz-cla-cla/6999177549.html,jacksonville,https://onslow.craigslist.org,277,,,,,,,,,,,,,,,,,,nc,,
-If we remove rows missing values, how will be predict on them?
+If we remove rows missing many values, how will be predict on them?
 
 
 
 Columns
 -------
-
-I would think that Year and Manufacturer/Model would be the best indicators of Price
+25 total columns
+My intuition is that Year and Manufacturer/Model would be the best indicators of Price
 
 
 
@@ -32,6 +32,7 @@ id
 UNIQUE
 Never Empty
 Indicates how LONG the listing has been on Craigslist?
+Otherwise likely not a good predictor of price
 
 
 
@@ -41,11 +42,12 @@ UNIQUE
 Never Empty
 Contains region_url (for the most part, see below)
 Contains id column
-Often (not always) contains vehicle description
+Often (not always) contains simplified vehicle description
 What's ctd vs cto in the URL?
 	/ctd/ = DEALER LISTING	(75%)
 	/cto/ = OWNER LISTING	(25%)
 	Could be an informative indicator!
+	Extract as a new feature?
 
 
 
@@ -67,7 +69,7 @@ athens	https://athensohio.craigslist.org
 charleston	https://charleston.craigslist.org
 charleston	https://charlestonwv.craigslist.org
 
-We either need to combine with 'state', or just use 'region_url'
+We either need to combine with 'state', or just use 'region_url' as categorical value
 	When we combine with 'state', we get about 420 combos
 	Some 'state' vals are incorrect, and some are missing, causing bad pairs
 	
@@ -78,9 +80,9 @@ region_url
 Categorical
 Never Empty
 413 distinct values
-	(More distinct region_url's than regions)
+	(More distinct region_url's than regions due to same region in multiple states)
 Often the prefix of url column, not NOT ALWAYS
-796 occurrences where they're DIFFERENT
+	796 occurrences where they're DIFFERENT
 Examples:
 https://hudsonvalley.craigslist.org/ctd/d/pawling-2006-scion-tc-great-condition/7049891619.html		https://catskills.craigslist.org
 https://oneonta.craigslist.org/cto/d/franklin-2000-toyota-tundra-2wd/7049982840.html				https://catskills.craigslist.org
@@ -90,6 +92,7 @@ https://poconos.craigslist.org/cto/d/cresco-2003-chevy-trailblazer-4wd/704997220
 
 price
 -----
+Target value
 Continuous
 Never empty
 43,579 rows with price=0
@@ -100,6 +103,8 @@ Addition 465 rows with price < $50
 Max is $3bn+
 Also, suspicious prices like '1111111' and '9999999'
 At what thresholds should we consider a price to be INVALID, and ignore the row?
+Look at percentiles to throw away outliers?
+In addition to thresholds, what other prices might we consider 'invalid', like '9999999'?
 
 
 
@@ -107,6 +112,7 @@ year
 ----
 Continuous
 1527 Empty rows
+	Would need some form of imputation (median?)
 Values: 1900-2021, all reasonable
 
 
@@ -117,8 +123,8 @@ Categorical
 22,764 rows missing value (4%)
 43 distinct values, most names look accurate
 	Except 'porche'
-Missing some values like 'isuzu' and 'suzuki'
-It looks like the manufacturer is parsed from the model column,
+Missing numerous values like 'isuzu' and 'suzuki'
+It looks like the manufacturer is parsed out  from the model column,
 and when it doesn't match a known value, it's left empty.
 	e.g. "Cadilla DTS"
 When manufacturer is empty, it often appears in the 'model' column instead.
@@ -140,7 +146,7 @@ Categorical
 CASE SENSITIVE differences:
 	35,820 unique values if we consider CaSe
 	34,257 unique values if we DON'T consider CaSe (not much of a difference)
-Should remove case-sensitivities!
+We should remove case-sensitivities!
 
 LOTS of duplication, misspelling, free-form descriptions:
 
@@ -169,9 +175,9 @@ We DON'T want to consider these different models!
 Requires LOTS of CLEANUP!
 
 Possible preprocessing:
-Replace non-alphanumeric chars with spaces?
-Replace multiple spaces with single space
-Consider the first two or three words?
+- Replace non-alphanumeric chars with spaces?
+- Replace multiple spaces with single space
+- Consider the first two or three words only?
 
 
 
@@ -179,7 +185,7 @@ condition
 ---------
 Categorical (Ordered)
 231,933 Empty rows (46%)
-	(Almost half of the data is missing...)
+	(Almost HALF of the data is missing...)
 6 Distinct values:
 	excellent
 	good
@@ -194,6 +200,7 @@ cylinders
 ---------
 Categorical (Ordered) (Discrete)
 199,682 Empty rows (39%)
+	LOTs of data missing
 8 Distinct values:
 	3 cylinders
 	4 cylinders
@@ -204,7 +211,9 @@ Categorical (Ordered) (Discrete)
 	12 cylinders
 	other
 
-Should mostly be a function of Model (and maybe year)
+Should mostly be a function of Model (and maybe year), but not always
+	Same model could come with different engine offerings (e.g. 4 cyl and 6 cyl)
+	Could possibly impute missing values from (manufacturer, model) pair or (manufacturer, model, year) tuple
 
 
 
@@ -220,13 +229,14 @@ Categorical
 	hybrid
 
 Again, mostly a function of model
+Vast majority are gas (87%) = best static imputation
 
 
 
 odometer
 --------
 Continuous
-92,324 Empty rows
+92,324 Empty rows (18%)
 2,268 rows with odometer=0
 Another 784 rows with odometer < 10
 Lots of '999999', '9999999' values
@@ -240,12 +250,12 @@ Too many zeros?
 e.g. 6,500,000 is probably supposed to be 65,000
 Why lots of repeated, very specific values? e.g. 1,393,421
 How should we find & handle outliers?
-
+	Percentiles?
 
 
 title_status
 ------------
-Categorical (Ordered?)
+Categorical (Ordered? Not really...)
 3,062 Empty rows
 6 Distinct Values:
 	clean
@@ -266,6 +276,7 @@ Categorical
 	automatic
 	other
 	
+Vast majority are 'automatic' (90%) = best static imputation value
 Traditionally, automatics were slightly more expensive...
 
 
@@ -274,11 +285,11 @@ vin
 ---
 207,350 Empty rows (41%)
 295,103 valid VINs (if we ignore case)
-	Only 175,973 are actually Distinct, lots of duplicates
+	Only 175,973 are actually Distinct, lots of duplicates for some reason
 Otherwise, lots of garbage, 1 missing character, only last 6 digits, 'upon request', etc. (7,124 rows)
 
 Not sure we can do anything with this.  Should be unique per vehicle, but DOES encode information about the vehicle,
-but slightly different per manufacturer.
+but slightly different format per manufacturer.
 
 
 
@@ -292,6 +303,7 @@ Categorical
 	rwd
 
 Often a function of *model*
+Fairly even distribution
 
 
 
@@ -299,6 +311,7 @@ size
 ----
 Categorical (Ordered)
 342,003 Empty rows (67%)
+	More than HALF the data is missing
 4 Distinct values:
 	compact
 	mid-size
@@ -355,7 +368,7 @@ How much does this impact price?
 Is 'custom' a turn-off or a premium?
 Should we 'bin' these into common colors and 'unusual' colors?
 	bin by frequency?
-
+	Reduce the # of categories to two or three
 
 
 image_url
@@ -381,7 +394,8 @@ e.g. "...originally it sold for $71,055 (MSRP in glove box)..."
 
 county
 ------
-COMPLETELY EMPTY - DELETE!
+COMPLETELY EMPTY - DELETE the column!
+
 
 
 state
@@ -399,7 +413,9 @@ Continuous
 10,329 Empty rows
 Values range from -82 to 81.5
 Which values are VALID for the United States?
-
+	About 19 to 72 degrees
+	Alaska account for values above 50 degrees
+	
 
 long
 ----
@@ -407,6 +423,7 @@ Continuous
 10,329 Empty rows
 Values range from -165 to 94
 Which values are VALID for the United States?
-
+	About -180 to -65
+	Alaska and Hawaii account for everything below about -125
 
 
