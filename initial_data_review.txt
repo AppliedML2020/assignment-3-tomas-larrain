@@ -194,6 +194,9 @@ Categorical (Ordered)
 	new
 	salvage
 
+Ordered:
+	new > like new > excellent > good > fair > salvage
+
 
 
 cylinders
@@ -210,6 +213,9 @@ Categorical (Ordered) (Discrete)
 	10 cylinders
 	12 cylinders
 	other
+
+Ordered:
+	12 cylinders > 10 cylinders > 8 cylinders > 6 cylinders > 5 cylinders > 4 cylinders > 3 cylinders > other
 
 Should mostly be a function of Model (and maybe year), but not always
 	Same model could come with different engine offerings (e.g. 4 cyl and 6 cyl)
@@ -317,7 +323,10 @@ Categorical (Ordered)
 	mid-size
 	full-size
 	sub-compact
-	
+
+Ordered:
+	full-size > mid-size > compact > sub-compact
+
 This is really a function of vehicle *model*, which includes more information about the price.
 
 
@@ -425,6 +434,8 @@ Which values are VALID for the United States?
 	About -180 to -65
 	Alaska and Hawaii account for everything below about -125
 
+
+------------------------------------------------------------------------------------------
 
 Task 1:
     1. Drop based on descriptions - Brett
