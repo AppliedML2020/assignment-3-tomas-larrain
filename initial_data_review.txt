@@ -442,7 +442,21 @@ Task 1:
     2. Drop based on completely empty - Brett
     3. Continuous: Plot feature vs target - Brett
     4. Categorical: Box plots or scatter plots - Tomás
+        Bad prices are messing the whole thing.
+				Removing prices over $50,000 we are removing only 1% of all cars.
+				We still have many cars in very low prices.
+				Features that shows trends:
+					- Manufacturer
+					- Fuel
+					- Title status
+					- Drive
+					- type
+					- Some states escape from the mean (AK, MT, ID, UT)
+					- Some conditions as well
+					- Color, size, cylinders are not clear
     5. Lat-lng heatmap - Tomás
+        483,308 values within US normal range
+        We can see some density information, but not so much about price distribution.
 
 
 First steps: (Task 2)
