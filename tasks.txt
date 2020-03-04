@@ -1,0 +1,52 @@
+Task 1:
+    1. Drop based on descriptions - Brett
+    2. Drop based on completely empty - Brett
+    3. Continuous: Plot feature vs target - Brett
+    4. Categorical: Box plots or scatter plots - Tomás
+        Bad prices are messing the whole thing.
+				Removing prices over $50,000 we are removing only 1% of all cars.
+				We still have many cars in very low prices.
+				Features that shows trends:
+					- Manufacturer
+					- Fuel
+					- Title status
+					- Drive
+					- type
+					- Some states escape from the mean (AK, MT, ID, UT)
+					- Some conditions as well
+					- Color is not clear
+                    - Size and cylinders should be in order to conclude something
+        TODO: put discrete variables in correct order (size, condition, cylinders)
+    5. Lat-lng heatmap - Tomás
+        483,308 values within US normal range
+        We can see some density information, but not so much about price distribution.
+        Idea: use Target encoding using average price for a lat/long bin.
+
+
+First steps: (Task 2)
+    - Divide between training/testing = 0.4/0.1
+    - Create Pipelines:
+        1. Impute with median - scale
+        2. Impute with "N/A" - one-hot encoding
+        3. Impute with "N/A" - ordinal encoding - scaling
+        4. Cap to 99%
+        5. fuel: Impute with "gas" - one-hot encoding
+        6. title_status: Impute with "clean" - one-hot encoding
+        7. transmission: Impute with "automatic" - one-hot encoding
+        8. scaling only
+        9. target encoding
+    - Create 1 ColumnTransformer
+    - Create model
+    - Run cross-validation
+        
+
+Second steps: (Task 3)
+    0. Drop rows with "bad" target values (zero, too low, too high)
+    1. Detect invalid values and replacing them with something (e.g. binning odometer, prices, etc.)
+    2. Binning colors, and check which other column we can bin (e.g. title_status, etc.)
+    3. Parse url and use base as a new feature
+    
+Advanced steps: (Task 3 - optional)
+    1. Cleaning up model and manufacturer data (some kind of smart imputation)
+    2. Add feature from url => owner or dealer
+    3. Try something out using the description
