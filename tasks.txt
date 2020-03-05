@@ -36,6 +36,60 @@ First steps: (Task 2)
         8. scaling only
         9. target encoding
     - Create 1 ColumnTransformer
+        id
+            no imputation
+            some form of scaling?
+        region_url
+            no imputation
+            target encoding
+            scaling
+        year
+            impute (median)
+            scale (minmax or standard)
+        manufacturer
+            impute 'N/A' for missing values
+            one hot encoding 
+        condition
+            impute with new categorical value
+            ordinal encoding
+            scaling
+            Investigate dropping?
+        cylinders
+            impute with NEW categorical value, OR with the 'other' category
+            ordinal encoding (what to do with 2 N/A values)
+            scaling
+            Investigate dropping?
+        fuel
+            impute with 'gas' value
+            one-hot encoding
+        odometer
+            cap to 99% (make anything over = to 99%)
+            Leave 0 values
+            impute missing vals with median
+            scale (standard)
+        title_status
+             impute with 'clean'
+             one-hot encoding
+        transmission
+            impute with 'automatic'
+            one-hot encoding
+        drive
+            impute with NEW category
+            one-hot encoding
+        size
+            impute with NEW categorical value
+            ordinal encoding
+            scaling
+            Investigate dropping?
+        type
+            impute with NEW categorical value
+            one-hot encoding
+        paint_color
+            impute with NEW categorical value
+            one-hot encoding
+        state
+            impute with NEW cateorical value
+            one-hot encoding
     - Create model
     - Run cross-validation
         
