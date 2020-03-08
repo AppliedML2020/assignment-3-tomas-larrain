@@ -91,7 +91,7 @@ First steps: (Task 2)
             impute with NEW cateorical value
             one-hot encoding
     - Create model
-    - Run cross-validation
+    - Run cross-validation (could be a good idea to use timeSeriesSplit? sorted by id)
         
 
 Second steps: (Task 3)
