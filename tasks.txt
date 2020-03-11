@@ -96,12 +96,31 @@ First steps: (Task 2)
 
 Second steps: (Task 3)
     0. Drop rows with "bad" target values (zero, too low, too high)
-    1. Detect invalid values and replacing them with something (e.g. binning odometer, prices, etc.)
-    2. Binning colors, and check which other column we can bin (e.g. title_status, etc.)
-    3. Parse url and use base as a new feature (instead of region_url)
-    
+    	Filtering out targets above 99% helps ALOT (Ridge doesn't work without)
+    	99% is better than 95%.  In fact, 99% is pretty darn perfect.
+    1. Detect invalid values and replacing them with something (e.g. odometer, etc.)
+        Plot histograms to easily see outliers
+    2. Expoore capping of continuous variables to a maximim
+        i.e. treat everything above a threshold as the same value
+        capping the odometer helps A LOT
+            Lowering the cap to 200,000 is MUCH better than 500,000
+    3. Explore Binning
+        Binning of continuous vars -> categorical variables (e.g. odometer)
+        Sub-binning of categorical vars -> shorter list of categories (e.g. color)
+    4. Parse url and use base as a new feature (instead of region_url)
+        Which feature works better: region_url or prefix of url?
+        Which encoding works bettter for region: target encoding or one-hot-encoding?
+    5. One-hot encoding 'condition', 'cylinders', 'size' works better than ordinal encoding
+    	OHE only 'condition' vs ordinal encoding helps
+    	OHE only 'cylinders' vs ordinal encoding helps
+    	OHE only 'size' vs ordinal encoding helps
+    	(Dropping (all of) these columns does NOT help)
+    6. Cleaning up model and manufacturer data (some kind of smart imputation) - BRETT
+        TF/IDF?
+    7. Add feature from url => owner or dealer ('/cto/' or '/ctd/' in URL) - TOMAS
+
+
 Advanced steps: (Task 3 - optional)
-    1. Cleaning up model and manufacturer data (some kind of smart imputation)
-    2. Add feature from url => owner or dealer
-    3. Try something out using the description
-    4. Create a new feature from lat/long and target encode?
+    1. Try something out using the description
+        TF/IDF?
+    2. Create a new feature from lat/long and target encode?
